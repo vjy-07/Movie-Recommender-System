@@ -4,29 +4,11 @@ import requests
 import pandas as pd
 import time
 import os
-import gdown
+from dotenv import load_dotenv
 
-# --- Set API key from Streamlit secrets ---
-api_key = st.secrets["TMDB_API_KEY"]
-
-# --- Ensure 'model' directory and download large pkl files from Google Drive ---
-os.makedirs("model", exist_ok=True)
-
-# Replace these with your actual Google Drive file IDs
-MOVIE_FILE_ID = "1USqqaB28oSHLjh9WOdAQIp_Xb-SyTQbA"
-SIMILARITY_FILE_ID = "1vqyNIKogqA3NSGvW8O0QV-S6R5X64DvD"
-
-movie_url = f"https://drive.google.com/uc?id={MOVIE_FILE_ID}"
-sim_url = f"https://drive.google.com/uc?id={SIMILARITY_FILE_ID}"
-
-movie_output = "model/movie_list.pkl"
-sim_output = "model/similarity.pkl"
-
-if not os.path.exists(movie_output):
-    gdown.download(movie_url, movie_output, quiet=False)
-
-if not os.path.exists(sim_output):
-    gdown.download(sim_url, sim_output, quiet=False)
+# --- Load environment variables locally ---
+load_dotenv()
+api_key = os.getenv("TMDB_API_KEY")
 
 # --- Fetch poster safely with retry and fallback ---
 def fetch_poster(movie_id, retries=3):
@@ -86,7 +68,7 @@ def recommend(movie):
 st.set_page_config(page_title="Movie Recommender", layout="wide")
 st.header('🎬 Movie Recommender System')
 
-# Load data
+# Load local pickle data
 with open('model/movie_list.pkl', 'rb') as f:
     movies = pickle.load(f)
 
