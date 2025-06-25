@@ -3,8 +3,31 @@ import streamlit as st
 import requests
 import pandas as pd
 import time
+import os
+import gdown
 
+# --- Set API key from Streamlit secrets ---
 api_key = st.secrets["TMDB_API_KEY"]
+
+# --- Ensure 'model' directory and download large pkl files from Google Drive ---
+os.makedirs("model", exist_ok=True)
+
+# Replace these with your actual Google Drive file IDs
+MOVIE_FILE_ID = "1USqqaB28oSHLjh9WOdAQIp_Xb-SyTQbA"
+SIMILARITY_FILE_ID = "1vqyNIKogqA3NSGvW8O0QV-S6R5X64DvD"
+
+movie_url = f"https://drive.google.com/uc?id={MOVIE_FILE_ID}"
+sim_url = f"https://drive.google.com/uc?id={SIMILARITY_FILE_ID}"
+
+movie_output = "model/movie_list.pkl"
+sim_output = "model/similarity.pkl"
+
+if not os.path.exists(movie_output):
+    gdown.download(movie_url, movie_output, quiet=False)
+
+if not os.path.exists(sim_output):
+    gdown.download(sim_url, sim_output, quiet=False)
+
 # --- Fetch poster safely with retry and fallback ---
 def fetch_poster(movie_id, retries=3):
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US"
@@ -24,7 +47,7 @@ def fetch_poster(movie_id, retries=3):
                 return "https://via.placeholder.com/300x450?text=Error"
             time.sleep(1)
 
-# --- Recommendation logic with valid movie filtering ---
+# --- Recommendation logic ---
 def recommend(movie):
     matches = movies[movies['title'] == movie]
     if matches.empty:
@@ -45,7 +68,7 @@ def recommend(movie):
             movie_id = movies.iloc[i[0]]['id']
             name = movies.iloc[i[0]]['title']
             poster = fetch_poster(movie_id)
-            if poster:  # Ensure it's not empty or None
+            if poster:
                 recommended_movie_names.append(name)
                 recommended_movie_posters.append(poster)
                 count += 1
@@ -53,7 +76,6 @@ def recommend(movie):
             st.warning(f"⚠️ Skipped a movie due to error: {e}")
             continue
 
-    # Ensure list has exactly 5 items using placeholders
     while len(recommended_movie_names) < 5:
         recommended_movie_names.append("Unavailable")
         recommended_movie_posters.append("https://via.placeholder.com/300x450?text=Not+Available")
@@ -65,14 +87,15 @@ st.set_page_config(page_title="Movie Recommender", layout="wide")
 st.header('🎬 Movie Recommender System')
 
 # Load data
-movies = pickle.load(open('model/movie_list.pkl', 'rb'))
-similarity = pickle.load(open('model/similarity.pkl', 'rb'))
+with open('model/movie_list.pkl', 'rb') as f:
+    movies = pickle.load(f)
 
-# Convert dict to DataFrame if needed
+with open('model/similarity.pkl', 'rb') as f:
+    similarity = pickle.load(f)
+
 if isinstance(movies, dict):
     movies = pd.DataFrame(movies)
 
-# UI elements
 movie_list = movies['title'].values
 selected_movie = st.selectbox("Type or select a movie from the dropdown", movie_list)
 
