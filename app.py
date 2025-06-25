@@ -1,13 +1,10 @@
-from dotenv import load_dotenv
-import os
 import pickle
 import streamlit as st
 import requests
 import pandas as pd
 import time
 
-load_dotenv()
-api_key = os.getenv("TMDB_API_KEY")
+api_key = st.secrets["TMDB_API_KEY"]
 # --- Fetch poster safely with retry and fallback ---
 def fetch_poster(movie_id, retries=3):
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US"
