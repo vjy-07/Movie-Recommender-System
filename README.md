@@ -57,13 +57,14 @@ streamlit run app.py
 ```
 Movie-Recommender-System/
 │
-├── app.py                  # Main Streamlit app
-├── requirements.txt        # Python dependencies
-├── .env                    # API key
-├── .gitignore              # Ignore venv, .env, model
+├── app.py                      # Main Streamlit app
+├── requirements.txt            # Python dependencies
+├── Movie_Recommender_System.ipynb
+├── .env                        # API key
+├── .gitignore                  # Ignore venv, .env, model
 ├── model/
-    ├── movie_list.pkl      # Movie data
-    └── similarity.pkl      # Similarity matrix
+    ├── movie_list.pkl          # Movie data
+    └── similarity.pkl          # Similarity matrix
 ```
 ### 🧠 How It Works
 
